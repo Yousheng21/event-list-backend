@@ -1,17 +1,32 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  ParseIntPipe,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { NewsService } from './news.service';
+import { GetNewsDto } from './dto/news.dto';
+import { News } from 'src/entities/news.entity';
 
-@Controller('Newss')
+@Controller('news')
 export class NewsController {
-  constructor(private readonly NewsService: NewsService) {}
-
-  @Post()
-  createNews(@Body() { title }: { title: string }) {
-    return this.NewsService.createNews(title);
-  }
+  constructor(private readonly newsService: NewsService) {}
 
   @Get()
-  getAllNews() {
-    return this.NewsService.getAllNews();
+  public getAllNews(
+    @Query('take') take: number = 1,
+    @Query('skip') skip: number = 0,
+  ) {
+    return this.newsService.getAllNews(take, skip);
+  }
+
+  @Get(':id')
+  public async getNewsById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<News> {
+    return await this.newsService.getNewsById(id);
   }
 }
