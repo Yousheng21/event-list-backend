@@ -1,14 +1,5 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  ParseIntPipe,
-  Param,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, ParseIntPipe, Param, Query } from '@nestjs/common';
 import { NewsService } from './news.service';
-import { GetNewsDto } from './dto/news.dto';
 import { News } from 'src/entities/news.entity';
 
 @Controller('news')
@@ -19,8 +10,9 @@ export class NewsController {
   public getAllNews(
     @Query('take') take: number = 1,
     @Query('skip') skip: number = 0,
+    @Query('search') search: string = '',
   ) {
-    return this.newsService.getAllNews(take, skip);
+    return this.newsService.getAllNews(take, skip, search);
   }
 
   @Get(':id')

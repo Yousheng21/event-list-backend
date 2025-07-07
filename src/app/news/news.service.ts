@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Like } from 'typeorm';
 import { News } from '../../entities/news.entity';
-import { GetNewsDto } from './dto/news.dto';
-import { from, Observable } from 'rxjs';
 
 @Injectable()
 export class NewsService {
@@ -16,11 +14,36 @@ export class NewsService {
     return await this.newsRepository.findOneBy({ id });
   }
 
-  public getAllNews(take: number = 1, skip: number = 0): Observable<News[]> {
-    return from(
-      this.newsRepository.findAndCount({ take, skip }).then(([news]) => {
+  async getAllNews(
+    take: number = 1,
+    skip: number = 0,
+    search = '',
+  ): Promise<{ page: News[]; total: number }> {
+    const searchFormattedText = search.trim().toLowerCase().split(' ');
+    const where: FindOptionsWhere<News>[] = [];
+
+    for (const word of searchFormattedText) {
+      where.push({ title: Like(`%${word}%`) });
+      where.push({ city: Like(`%${word}%`) });
+      where.push({ description: Like(`%${word}%`) });
+      where.push({ company: Like(`%${word}%`) });
+    }
+
+    const total = (await this.newsRepository.find({ where })).length;
+
+    const page = await this.newsRepository
+      .findAndCount({
+        take: take || 10,
+        skip: skip || 0,
+        where,
+      })
+      .then(([news]) => {
         return news;
-      }),
-    );
+      });
+
+    return {
+      page,
+      total,
+    };
   }
 }

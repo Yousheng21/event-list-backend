@@ -22,6 +22,15 @@ export class News extends BaseEntity {
   @Column({ type: 'int' })
   number: number;
 
+  @Column({ type: 'timestamp', default: new Date() })
+  date: Date;
+
+  @Column()
+  city: string;
+
+  @Column()
+  company: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
